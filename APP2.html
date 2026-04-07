@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluador - Esquema de Redes</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #3498db;
+            --success: #27ae60;
+            --bg: #f4f7f6;
+            --text: #333;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .header-box {
+            background: #ebf2f7;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 5px solid var(--accent);
+            margin-bottom: 20px;
+        }
+
+        h1 { font-size: 1.2rem; color: var(--primary); margin: 0; }
+        p.instruction { font-size: 0.9rem; margin: 5px 0 0; color: #555; font-style: italic; }
+
+        .form-row { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.9rem; }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        /* Selector de Grupos */
+        .group-selector { display: flex; gap: 8px; margin-top: 5px; }
+        .group-option { flex: 1; position: relative; }
+        .group-option input { position: absolute; opacity: 0; }
+        .group-option label {
+            display: block; background: #fff; border: 2px solid #ddd;
+            padding: 10px; text-align: center; border-radius: 8px;
+            cursor: pointer; font-weight: bold; transition: 0.2s;
+        }
+        .group-option input:checked + label {
+            background: var(--accent); border-color: var(--accent); color: white;
+        }
+
+        /* Rúbrica */
+        .rubric-item {
+            background: #fff; border-bottom: 1px solid #eee;
+            padding: 12px 0; display: flex; justify-content: space-between; align-items: center;
+        }
+        .rubric-text { flex: 1; padding-right: 10px; }
+        .rubric-text strong { display: block; font-size: 0.9rem; }
+        .rubric-text small { color: #777; font-size: 0.75rem; }
+
+        select {
+            padding: 8px; border-radius: 6px; border: 1px solid #ccc;
+            font-size: 0.9rem; width: 130px;
+        }
+
+        /* Resultados */
+        .results-row {
+            display: flex; gap: 10px; margin: 20px 0;
+        }
+        .res-box {
+            flex: 1; text-align: center; padding: 15px; border-radius: 10px; color: white;
+        }
+        .res-pts { background: var(--primary); }
+        .res-grade { background: var(--success); }
+        .res-label { font-size: 0.7rem; display: block; text-transform: uppercase; }
+        .res-val { font-size: 1.6rem; font-weight: bold; }
+
+        /* Botones */
+        .btn-group { display: flex; gap: 10px; }
+        button {
+            padding: 15px; border: none; border-radius: 8px;
+            font-weight: bold; font-size: 1rem; flex: 1; cursor: pointer;
+        }
+        .btn-save { background: var(--success); color: white; flex: 2; }
+        .btn-csv { background: var(--accent); color: white; }
+
+        .history { margin-top: 30px; }
+        .record {
+            font-size: 0.85rem; padding: 10px; border-bottom: 1px solid #eee;
+            display: flex; justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-box">
+        <h1>📊 Evaluación de Informática</h1>
+        <p class="instruction">Actividad: Elabora un esquema ilustrado que diferencie los tipos de red (LAN, WAN, MAN Y WIFI).</p>
+    </div>
+
+    <div class="form-row">
+        <label>Estudiante:</label>
+        <input type="text" id="studentName" placeholder="Nombre completo">
+    </div>
+
+    <div class="form-row">
+        <label>Grupo:</label>
+        <div class="group-selector">
+            <div class="group-option"><input type="radio" id="g10A" name="group" value="10-A"><label for="g10A">10-A</label></div>
+            <div class="group-option"><input type="radio" id="g10B" name="group" value="10-B"><label for="g10B">10-B</label></div>
+            <div class="group-option"><input type="radio" id="g10C" name="group" value="10-C"><label for="g10C">10-C</label></div>
+        </div>
+    </div>
+
+    <div class="rubric-list">
+        <div class="rubric-item">
+            <div class="rubric-text"><strong>Contenido</strong><small>Def., características y ejemplos</small></div>
+            <select class="score-input" onchange="updateCalc()">
+                <option value="4">Excelente (4)</option><option value="3">Bueno (3)</option>
+                <option value="2">Básico (2)</option><option value="1">Deficiente (1)</option>
+            </select>
+        </div>
+        <div class="rubric-item">
+            <div class="rubric-text"><strong>Diferenciación</strong><small>Colores, cuadros o flechas</small></div>
+            <select class="score-input" onchange="updateCalc()">
+                <option value="4">Excelente (4)</option><option value="3">Bueno (3)</option>
+                <option value="2">Básico (2)</option><option value="1">Deficiente (1)</option>
+            </select>
+        </div>
+        <div class="rubric-item">
+            <div class="rubric-text"><strong>Visuales</strong><small>Imágenes, íconos o dibujos</small></div>
+            <select class="score-input" onchange="updateCalc()">
+                <option value="4">Excelente (4)</option><option value="3">Bueno (3)</option>
+                <option value="2">Básico (2)</option><option value="1">Deficiente (1)</option>
+            </select>
+        </div>
+        <div class="rubric-item">
+            <div class="rubric-text"><strong>Organización</strong><small>Orden y facilidad de lectura</small></div>
+            <select class="score-input" onchange="updateCalc()">
+                <option value="4">Excelente (4)</option><option value="3">Bueno (3)</option>
+                <option value="2">Básico (2)</option><option value="1">Deficiente (1)</option>
+            </select>
+        </div>
+        <div class="rubric-item">
+            <div class="rubric-text"><strong>Ortografía</strong><small>Limpieza y redacción</small></div>
+            <select class="score-input" onchange="updateCalc()">
+                <option value="4">Excelente (4)</option><option value="3">Bueno (3)</option>
+                <option value="2">Básico (2)</option><option value="1">Deficiente (1)</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="results-row">
+        <div class="res-box res-pts">
+            <span class="res-label">Puntos</span>
+            <span class="res-val" id="ptsVal">20</span>/20
+        </div>
+        <div class="res-box res-grade">
+            <span class="res-label">Promedio</span>
+            <span class="res-val" id="gradeVal">5.0</span>
+        </div>
+    </div>
+
+    <div class="btn-group">
+        <button class="btn-save" onclick="saveData()">💾 Guardar</button>
+        <button class="btn-csv" onclick="exportCSV()">📥 CSV</button>
+    </div>
+
+    <div class="history">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h3>Historial</h3>
+            <button onclick="clearAll()" style="background:none; border:none; color:red; font-size:10px; cursor:pointer;">BORRAR TODO</button>
+        </div>
+        <div id="list"></div>
+    </div>
+</div>
+
+<script>
+    let db = JSON.parse(localStorage.getItem('eval_redes_v2')) || [];
+
+    window.onload = () => { renderList(); updateCalc(); };
+
+    function updateCalc() {
+        let total = 0;
+        document.querySelectorAll('.score-input').forEach(s => total += parseInt(s.value));
+        let grade = (total * 0.2) + 1.0;
+        document.getElementById('ptsVal').innerText = total;
+        document.getElementById('gradeVal').innerText = grade.toFixed(1);
+        return { total, grade: grade.toFixed(1) };
+    }
+
+    function saveData() {
+        const name = document.getElementById('studentName').value.trim();
+        const group = document.querySelector('input[name="group"]:checked');
+        const res = updateCalc();
+
+        if (!name || !group) return alert("Completa nombre y grupo.");
+
+        db.push({ name, group: group.value, pts: res.total, grade: res.grade, date: new Date().toLocaleDateString() });
+        localStorage.setItem('eval_redes_v2', JSON.stringify(db));
+
+        // Reset
+        document.getElementById('studentName').value = "";
+        group.checked = false;
+        document.querySelectorAll('.score-input').forEach(s => s.selectedIndex = 0);
+        updateCalc();
+        renderList();
+    }
+
+    function renderList() {
+        const list = document.getElementById('list');
+        list.innerHTML = db.slice(-5).reverse().map(i => `
+            <div class="record">
+                <span><strong>${i.name}</strong> (${i.group})</span>
+                <span>Nota: <strong>${i.grade}</strong></span>
+            </div>
+        `).join('');
+    }
+
+    function exportCSV() {
+        if (!db.length) return alert("Sin datos.");
+        let csv = "\uFEFFNombre;Grupo;Puntos;Nota;Fecha\n";
+        db.forEach(i => csv += `${i.name};${i.group};${i.pts};${i.grade};${i.date}\n`);
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "Notas_Esquema_Redes.csv";
+        a.click();
+    }
+
+    function clearAll() {
+        if(confirm("¿Borrar todo?")) { db = []; localStorage.removeItem('eval_redes_v2'); renderList(); }
+    }
+</script>
+
+</body>
+</html>
